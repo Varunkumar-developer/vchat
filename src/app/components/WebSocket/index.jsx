@@ -51,7 +51,9 @@ const parseIncoming = (raw) => {
 // Shortened preview of a quoted message for reply metadata / chips
 const makeQuoteSnippet = (text) => {
   if (isGifMessage(text)) return "GIF";
-  const clean = String(text ?? "").replace(/\s+/g, " ").trim();
+  const clean = String(text ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
   return clean.length > 80 ? `${clean.slice(0, 77)}...` : clean;
 };
 
@@ -182,16 +184,9 @@ export default function WebSocket() {
         { ...data, text, msgId, replyTo, reactions: {} },
       ]);
 
-      if (
-        document.hidden &&
-        data.user &&
-        text &&
-        data.id !== socket.id
-      ) {
+      if (document.hidden && data.user && text && data.id !== socket.id) {
         showNotification(`New message from ${data.user}`, {
-          body: isGifMessage(text)
-            ? "Sent a GIF"
-            : text,
+          body: isGifMessage(text) ? "Sent a GIF" : text,
         });
       }
     });
@@ -211,16 +206,10 @@ export default function WebSocket() {
     if (!showEmoji && !showGif) return;
 
     const onPointerDown = (e) => {
-      if (
-        emojiWrapRef.current &&
-        !emojiWrapRef.current.contains(e.target)
-      ) {
+      if (emojiWrapRef.current && !emojiWrapRef.current.contains(e.target)) {
         setShowEmoji(false);
       }
-      if (
-        gifWrapRef.current &&
-        !gifWrapRef.current.contains(e.target)
-      ) {
+      if (gifWrapRef.current && !gifWrapRef.current.contains(e.target)) {
         setShowGif(false);
       }
     };
@@ -474,7 +463,10 @@ export default function WebSocket() {
               // ✅ Server/System message
               if (msg.user === "Server") {
                 return (
-                  <p key={index} className="text-center text-xs italic text-gray-500 bg-gray-100 px-3 py-1 rounded w-fit mx-auto animate-fadeIn my-[16px]">
+                  <p
+                    key={index}
+                    className="text-center text-xs italic text-gray-500 bg-gray-100 px-3 py-1 rounded w-fit mx-auto animate-fadeIn my-[16px]"
+                  >
                     {msg.text}
                   </p>
                 );
@@ -505,6 +497,62 @@ export default function WebSocket() {
                   <div className="flex flex-col min-w-0">
                     {/* Bubble + reaction trigger */}
                     <div className="flex items-center gap-[4px] group min-w-0">
+                      {isMe ? (
+                        <>
+                          {/* Reply trigger */}
+                          <button
+                            type="button"
+                            title="Reply"
+                            onClick={() => startReply(msg)}
+                            className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="size-4"
+                            >
+                              <polyline points="9 14 4 9 9 4" />
+                              <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+                            </svg>
+                          </button>
+
+                          <button
+                            type="button"
+                            data-reaction-popover
+                            title="React"
+                            onClick={() =>
+                              setReactionFor(
+                                reactionFor === index ? null : index,
+                              )
+                            }
+                            className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="size-4"
+                            >
+                              <circle cx="12" cy="12" r="9" />
+                              <path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8" />
+                              <line x1="9" y1="9.5" x2="9.01" y2="9.5" />
+                              <line x1="15" y1="9.5" x2="15.01" y2="9.5" />
+                            </svg>
+                          </button>
+                        </>
+                      ) : (
+                        ""
+                      )}
+
                       {isGif ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -538,53 +586,61 @@ export default function WebSocket() {
                         </div>
                       )}
 
-                      {/* Reply trigger */}
-                      <button
-                        type="button"
-                        title="Reply"
-                        onClick={() => startReply(msg)}
-                        className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="size-4"
-                        >
-                          <polyline points="9 14 4 9 9 4" />
-                          <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
-                        </svg>
-                      </button>
+                      {!isMe ? (
+                        <>
+                          {/* Reply trigger */}
+                          <button
+                            type="button"
+                            title="Reply"
+                            onClick={() => startReply(msg)}
+                            className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="size-4"
+                            >
+                              <polyline points="9 14 4 9 9 4" />
+                              <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+                            </svg>
+                          </button>
 
-                      <button
-                        type="button"
-                        data-reaction-popover
-                        title="React"
-                        onClick={() =>
-                          setReactionFor(reactionFor === index ? null : index)
-                        }
-                        className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="size-4"
-                        >
-                          <circle cx="12" cy="12" r="9" />
-                          <path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8" />
-                          <line x1="9" y1="9.5" x2="9.01" y2="9.5" />
-                          <line x1="15" y1="9.5" x2="15.01" y2="9.5" />
-                        </svg>
-                      </button>
+                          <button
+                            type="button"
+                            data-reaction-popover
+                            title="React"
+                            onClick={() =>
+                              setReactionFor(
+                                reactionFor === index ? null : index,
+                              )
+                            }
+                            className="shrink-0 p-[2px] rounded-full cursor-pointer text-gray-400 opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-70 hover:!opacity-100 hover:bg-gray-100 transition-all"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="size-4"
+                            >
+                              <circle cx="12" cy="12" r="9" />
+                              <path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8" />
+                              <line x1="9" y1="9.5" x2="9.01" y2="9.5" />
+                              <line x1="15" y1="9.5" x2="15.01" y2="9.5" />
+                            </svg>
+                          </button>
+                        </>
+                      ) : (
+                        ""
+                      )}
                     </div>
 
                     {/* Reaction chips */}
@@ -629,7 +685,9 @@ export default function WebSocket() {
                               type="button"
                               onClick={() => toggleReaction(msg, emoji)}
                               className={`text-lg leading-none p-[4px] rounded-full cursor-pointer transition-transform hover:scale-125 ${
-                                mine ? "bg-blue-50 scale-110" : "hover:bg-gray-100"
+                                mine
+                                  ? "bg-blue-50 scale-110"
+                                  : "hover:bg-gray-100"
                               }`}
                             >
                               {emoji}
@@ -716,9 +774,7 @@ export default function WebSocket() {
                   </svg>
                 </button>
 
-                {showEmoji && (
-                  <EmojiPicker onSelect={insertEmoji} />
-                )}
+                {showEmoji && <EmojiPicker onSelect={insertEmoji} />}
               </div>
               <textarea
                 ref={ref}
@@ -750,9 +806,7 @@ export default function WebSocket() {
                   GIF
                 </button>
 
-                {showGif && (
-                  <GifPicker onSelect={sendGif} />
-                )}
+                {showGif && <GifPicker onSelect={sendGif} />}
               </div>
 
               <button
@@ -809,7 +863,7 @@ export default function WebSocket() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         onKeyDown={handleUsernameKeyDown}
-                        className={` ${(error && !username.trim()) ? "border-red-300" : "border-gray-100 "} border border-solid w-full block rounded h-[40px] outline-none px-[16px] text-sm`}
+                        className={` ${error && !username.trim() ? "border-red-300" : "border-gray-100 "} border border-solid w-full block rounded h-[40px] outline-none px-[16px] text-sm`}
                       />
                       {error && !username.trim() && (
                         <p className="text-xs text-red-500 mt-[6px]">
